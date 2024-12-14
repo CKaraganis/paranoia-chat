@@ -1,0 +1,13 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+<div class="text-center">
+    <form method="post">
+        <label for="characterInput">Enter your character name:</label>
+        <input id="characterInput" name="characterName" />
+        <button type="submit" title="Submit" name="submit" id="submitCharacter" class="border-0 bg-transparent"><i class="fa-solid fa-arrow-right"></i></button>
+    </form>
+</div>
