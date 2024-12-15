@@ -10,19 +10,20 @@
     <link rel="stylesheet" href="~/Paranoia.Client.styles.css" asp-append-version="true" />
 </head>
 <body class="bg-dark text-white">
-    <div class="container col" style="height: 100vh">
+
+    <div class="container col" style="height: 95vh">
         @RenderBody()
     </div>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.1/js/all.min.js" integrity="sha512-1JkMy1LR9bTo3psH+H4SV5bO2dFylgOy+UJhMus1zF4VEFuZVu5lsi4I6iIndE4N9p01z1554ZDcvMSjMaqCBQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src=""></script>
+    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
 
-    // <script>
-    //     const client = mqtt.connect("mqtt://192.168.1.40:1883");
-    // </script>
+    <script>
+        const mqttClient = mqtt.connect("ws://192.168.1.40:9001");
+    </script>
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>

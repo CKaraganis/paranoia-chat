@@ -1,0 +1,116 @@
+﻿@page
+@model Paranoia.Client.Pages.GMChatModel
+
+<style>
+    .chat-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+    }
+</style>
+
+<div id="msgTemplate" class="mb-2" hidden>
+    <label class="small"></label>
+    <div class="row border border-1 rounded border-grey p-2 text-wrap"></div>
+</div>
+
+<div class="chat-grid">
+    @foreach(var chat in Model.Chats)
+    {
+        <div id="@chat.Key">
+            <div class="d-flex justify-content-between mb-1">
+                <div>@chat.Key</div>
+                <button id="nuke-@chat.Key" class="btn btn-sm bg-white text-black border-dark">Nuke</button>
+            </div>
+            <div id="@chat.Key-card" class="border border-4 rounded p-4 border-white" style="height: 42vh; overflow-y: scroll;">
+                <div id="@chat.Key-msg-history" class="chat-card-body">
+                    @foreach (var msg in chat.Value)
+                    {
+                        <div class="mb-2">
+                            <label for="@msg.Id" class="small">@(msg.Sender == Enums.Sender.Player ? chat.Key : "Game Master")</label>
+                            <div class="row border border-1 rounded border-grey p-2 text-wrap" id="@msg.Id">
+                                @msg.Contents
+                            </div>
+                        </div>
+                    }
+                </div>
+                <form class="row mt-5" name="@(chat.Key)">
+                    @Html.AntiForgeryToken()
+                    <input id="message" name="message" type="text" class="col" />
+                    <button id="sendMessage" type="submit" class="border-0 bg-transparent col-auto"><i class="fa-solid fa-arrow-right text-white"></i></button>
+                </form>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts
+{
+    @foreach (var chat in Model.Chats)
+    {
+        <script>
+            document.forms["@chat.Key"].addEventListener("submit", (event) => {
+                event.preventDefault();
+
+                $.ajax({
+                    url: "?Character=@chat.Key",
+                    method: "POST",
+                    data: {
+                        "__RequestVerificationToken": document.forms["@chat.Key"][0].value,
+                        character: "@chat.Key",
+                        message: document.forms["@chat.Key"][1].value
+                    },
+                    success: function () {
+                        addMessage("Game Master", document.forms["@chat.Key"][1].value, "@chat.Key");
+                        document.forms["@chat.Key"][1].value = "";
+                    }
+                })
+            })
+
+            document.getElementById("nuke-@chat.Key").addEventListener("click", (event) => {
+                $.ajax({
+                    url: "?CharacterName=@chat.Key",
+                    method: "DELETE",
+                    data: {
+                        "__RequestVerificationToken": document.forms["@chat.Key"][0].value,
+                    },
+                    success: function () {
+                        document.getElementById("@chat.Key").remove();
+                    }
+                })
+            })
+
+            mqttClient.on("connect", () => {
+                mqttClient.subscribe("@Constants.Topics.PlayerMessage@chat.Key", (err) => {
+                });
+            });
+
+            mqttClient.on("message", (topic, message) => {
+                if (topic == "@Constants.Topics.PlayerMessage@chat.Key")
+                    addMessage("@chat.Key", message.toString(), "@chat.Key");
+            });
+        </script>
+    }
+
+    <script>
+        function addMessage(sender, content, character) {
+            const template = document.getElementById("msgTemplate");
+            const clone = template.cloneNode(true);
+            clone.children[0].textContent = sender;
+            clone.children[1].textContent = content;
+            clone.removeAttribute("hidden");
+            document.getElementById(`${character}-msg-history`).appendChild(clone);
+        }
+
+        mqttClient.on("connect", () => {
+            mqttClient.subscribe("@Constants.Topics.ChatAdded", (err) => {
+            });
+        });
+
+        mqttClient.on("message", (topic, message) => {
+            if (topic == "@Constants.Topics.ChatAdded") {
+                document.location.reload();
+            }
+        });
+    </script>
+}

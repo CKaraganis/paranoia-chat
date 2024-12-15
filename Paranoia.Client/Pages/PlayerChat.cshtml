@@ -39,16 +39,28 @@
                     Message: event.currentTarget[1].value
                 },
                 success: function () {
-                    const template = document.getElementById("msgTemplate");
-                    const clone = template.cloneNode(true);
-                    clone.children[0].textContent = "@Model.CharacterName";
-                    clone.children[1].textContent = document.forms[0][1].value;
-                    clone.removeAttribute("hidden");
-                    document.getElementById("msgHistory").appendChild(clone);
-
+                    addMessage("@Model.CharacterName", document.forms[0][1].value);
                     document.forms[0][1].value = "";
                 }
             })
         })
+
+        mqttClient.on("connect", () => {
+            mqttClient.subscribe("@Constants.Topics.GMPlayerMessage@Model.CharacterName", (err) => {
+            });
+        });
+
+        mqttClient.on("message", (topic, message) => {
+            addMessage("Game Master", message.toString())
+        });
+
+        function addMessage(sender, content) {
+            const template = document.getElementById("msgTemplate");
+            const clone = template.cloneNode(true);
+            clone.children[0].textContent = sender;
+            clone.children[1].textContent = content;
+            clone.removeAttribute("hidden");
+            document.getElementById("msgHistory").appendChild(clone);
+        }
     </script>
 }

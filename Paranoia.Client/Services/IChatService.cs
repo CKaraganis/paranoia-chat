@@ -9,7 +9,11 @@ namespace Paranoia.Client.Services
 
         List<Message> GetChatHistory(string characterName);
 
+        Dictionary<string, List<Message>> GetAllChatHistory();
+
         void RegisterChat(string characterName);
+
+        void NukeChat(string characterName);
 
         void SendMessage(string characterName, string message, Sender sender);
     }

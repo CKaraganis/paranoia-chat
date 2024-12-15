@@ -5,18 +5,13 @@ namespace Paranoia.Client.Services
 {
     public class ChatService : IChatService
     {
-        private static Dictionary<string, List<Message>> Chats = [];
+        private static Dictionary<string, List<Message>> Chats { get; set; } = [];
 
         private readonly IMessageService _messageService;
 
         public ChatService(IMessageService messageService) 
         {
             _messageService = messageService;
-
-#if DEBUG
-            if (!Chats.ContainsKey("Roy-G-BIV"))
-                Chats.Add("Roy-G-BIV", [new Message("Message 1", Sender.Player), new Message("Message 2", Sender.GameMaster), new Message("This is a really really really really really really really really really really really really really really really really really really really really really really really really really really really really really really really really really really really really really really really really really really really really really really really really really really really really really really really really really really really really really really really really really really really really really really really long message.", Sender.Player)]);
-#endif
         }
 
         /// <summary>
@@ -31,12 +26,19 @@ namespace Paranoia.Client.Services
         public List<Message> GetChatHistory(string characterName) =>
             Chats.FirstOrDefault(c => c.Key == characterName).Value ?? [];
 
+        public Dictionary<string, List<Message>> GetAllChatHistory() => Chats;
+
         public void RegisterChat(string characterName)
         {
             if (Chats.ContainsKey(characterName))
                 return;
             Chats.Add(characterName, []);
             _messageService.SendMessage(Constants.Topics.ChatAdded, characterName);
+        }
+
+        public void NukeChat(string characterName)
+        {
+            Chats.Remove(characterName);
         }
 
         public void SendMessage(string characterName, string message, Sender sender)

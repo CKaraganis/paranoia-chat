@@ -4,10 +4,41 @@
     ViewData["Title"] = "Home page";
 }
 
+<style>
+    .separator {
+        margin: 2rem 0 2rem 0;
+        display: flex;
+        align-items: center;
+        text-align: center;
+    }
+
+        .separator::before,
+        .separator::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid white;
+        }
+
+        .separator:not(:empty)::before {
+            margin-right: .5em;
+        }
+
+        .separator:not(:empty)::after {
+            margin-left: .5em;
+        }
+</style>
+
 <div class="h-100 align-content-center">
     <h3 class="text-center">Enter Character Name</h3>
     <form method="post" class="text-center align-content-center">
         <input id="characterInput" name="characterName" asp-for="CharacterName" />
         <button type="submit" title="Submit" name="submit" id="submitCharacter" class="border-0 bg-transparent"><i class="fa-solid fa-arrow-right text-white"></i></button>
     </form>
+
+    <div class="separator">OR</div>
+
+    <div class="d-flex align-content-center justify-content-center">
+        <a class="btn btn-primary bg-white text-black border-dark" href="GMChat">GM Chat</a>
+    </div>
 </div>
+
