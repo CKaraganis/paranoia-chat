@@ -1,27 +1,23 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Paranoia.Client.Services;
 using System.ComponentModel.DataAnnotations;
 
 namespace Paranoia.Client.Pages
 {
-    public class IndexModel : PageModel
+    public class IndexModel(ILogger<IndexModel> _logger, IChatService _chatService) : PageModel
     {
-        private readonly ILogger<IndexModel> _logger;
-
-        public IndexModel(ILogger<IndexModel> logger)
-        {
-            _logger = logger;
-        }
-
         public async Task<IActionResult> OnPostAsync()
         {
             if (!ModelState.IsValid)
                 return Page();
 
-            return Redirect("/PlayerChat");
+            _chatService.RegisterChat(CharacterName);
+
+            return Redirect($"/PlayerChat/{CharacterName}");
         }
 
-        [Required, RegularExpression(@"\S+[-]\S[-]\S{3}")]
+        [BindProperty, Required, RegularExpression(Constants.CharacterNameRegex)]
         public string CharacterName { get; set; }
     }
 }

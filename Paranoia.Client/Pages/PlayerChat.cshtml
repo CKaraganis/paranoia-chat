@@ -1,8 +1,54 @@
-﻿@page
+﻿@page "{CharacterName}"
 @model Paranoia.Client.Pages.PlayerChatModel
-@{
-}
 
-<div>
-    You are now chatting with the DM.
+<div class="container">
+    <div id="msgHistory">
+        <div class="mt-3 " id="msgTemplate" hidden>
+            <label class="small"></label>
+            <div class="row border border-1 rounded border-grey p-2 text-wrap"></div>
+        </div>
+        @foreach (var msg in Model.Messages)
+        {
+            <div class="mt-3 ">
+                <label for="@msg.Id" class="small">@(msg.Sender == Enums.Sender.Player ? Model.CharacterName : "Game Master")</label>
+                <div class="row border border-1 rounded border-grey p-2 text-wrap" id="@msg.Id">
+                    @msg.Contents
+                </div>
+            </div>
+        }
+    </div>
+    
+    <form class="row mt-5" name="antiForgeryForm">
+        @Html.AntiForgeryToken()
+        <input id="message" name="message" type="text" class="col" asp-for="Message" />
+        <button id="sendMessage" type="submit" class="border-0 bg-transparent col-auto"><i class="fa-solid fa-arrow-right text-white"></i></button>
+    </form>
 </div>
+
+@section Scripts
+{
+    <script>
+        document.forms["antiForgeryForm"].addEventListener("submit", (event) => {
+            event.preventDefault();
+
+            $.ajax({
+                url: "/PlayerChat/@Model.CharacterName",
+                method: "POST",
+                data: {
+                    "__RequestVerificationToken": event.currentTarget[0].value,
+                    Message: event.currentTarget[1].value
+                },
+                success: function () {
+                    const template = document.getElementById("msgTemplate");
+                    const clone = template.cloneNode(true);
+                    clone.children[0].textContent = "@Model.CharacterName";
+                    clone.children[1].textContent = document.forms[0][1].value;
+                    clone.removeAttribute("hidden");
+                    document.getElementById("msgHistory").appendChild(clone);
+
+                    document.forms[0][1].value = "";
+                }
+            })
+        })
+    </script>
+}
